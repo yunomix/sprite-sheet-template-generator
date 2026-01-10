@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sprite Sheet Template Generator</title>
+  <link rel="stylesheet" href="/src/styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Sprite Sheet Template Generator</h1>
+
+    <div class="main-content">
+      <!-- 設定パネル -->
+      <section class="settings-panel">
+        <h2>設定</h2>
+
+        <div class="form-group">
+          <label for="tileFormat">オートタイル形式:</label>
+          <select id="tileFormat">
+            <option value="16">16タイル</option>
+            <option value="47">47タイル</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="tileSize">タイルサイズ (px):</label>
+          <input type="number" id="tileSize" value="64" min="1">
+        </div>
+
+        <div class="form-group">
+          <label for="tilePadding">パディング (px):</label>
+          <input type="number" id="tilePadding" value="0" min="0">
+        </div>
+
+        <div class="form-group">
+          <label for="tileOffset">オフセット (px):</label>
+          <input type="number" id="tileOffset" value="0" min="0">
+        </div>
+
+        <div class="form-group">
+          <label for="fillColor">フィルの色:</label>
+          <input type="color" id="fillColor" value="#00ff00">
+        </div>
+
+        <div class="form-group">
+          <label for="borderColor">外周の色:</label>
+          <input type="color" id="borderColor" value="#ffff00">
+        </div>
+
+        <div class="form-group">
+          <label for="borderWidth">外周の太さ (px):</label>
+          <input type="number" id="borderWidth" value="10" min="0">
+        </div>
+
+        <div class="button-group">
+          <button id="generateBtn" class="primary-btn">テンプレート生成</button>
+          <button id="saveTemplateBtn" class="secondary-btn">テンプレート保存</button>
+        </div>
+      </section>
+
+      <!-- プレビューエリア -->
+      <section class="preview-section">
+        <h2>テンプレートプレビュー</h2>
+        <div class="preview-container" id="templatePreviewContainer">
+          <canvas id="templateCanvas"></canvas>
+        </div>
+      </section>
+    </div>
+
+    <hr>
+
+    <div class="adjustment-section">
+      <h2>スプライトシート調整</h2>
+
+      <div class="adjustment-controls">
+        <div class="form-group">
+          <label for="spriteInput">スプライトシート読み込み:</label>
+          <input type="file" id="spriteInput" accept="image/*">
+        </div>
+
+        <div class="button-group">
+          <button id="autoAdjustBtn" class="primary-btn">自動調整</button>
+          <button id="saveAdjustedBtn" class="secondary-btn">調整済み画像を保存</button>
+        </div>
+      </div>
+
+      <div class="preview-row">
+        <div class="preview-item">
+          <h3>元画像</h3>
+          <div class="preview-container" id="originalPreviewContainer">
+            <canvas id="originalCanvas"></canvas>
+          </div>
+        </div>
+
+        <div class="preview-item">
+          <h3>調整後</h3>
+          <div class="preview-container" id="adjustedPreviewContainer">
+            <canvas id="adjustedCanvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
