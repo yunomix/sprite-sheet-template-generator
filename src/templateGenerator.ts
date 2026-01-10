@@ -2,7 +2,7 @@
  * スプライトシートテンプレート生成
  */
 
-import { ImageProcessor, Color, Rect } from './imageProcessor';
+import { ImageProcessor, Color } from './imageProcessor';
 
 export interface TemplateConfig {
   tileFormat: 16 | 47;
