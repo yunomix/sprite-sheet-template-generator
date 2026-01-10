@@ -20,13 +20,13 @@ class App {
   // Detailed color settings
   private detailedColorModeCheckbox!: HTMLInputElement;
   private detailedColorSettings!: HTMLElement;
+  private borderColorGroup!: HTMLElement;
   private borderColorTopInput!: HTMLInputElement;
   private borderColorBottomInput!: HTMLInputElement;
   private borderColorLeftInput!: HTMLInputElement;
   private borderColorRightInput!: HTMLInputElement;
   private borderColorCornerInput!: HTMLInputElement;
 
-  private generateBtn!: HTMLButtonElement;
   private saveTemplateBtn!: HTMLButtonElement;
   private spriteInput!: HTMLInputElement;
   private autoAdjustBtn!: HTMLButtonElement;
@@ -60,6 +60,7 @@ class App {
     // Detailed color settings
     this.detailedColorModeCheckbox = document.getElementById('detailedColorMode') as HTMLInputElement;
     this.detailedColorSettings = document.getElementById('detailedColorSettings') as HTMLElement;
+    this.borderColorGroup = document.getElementById('borderColorGroup') as HTMLElement;
     this.borderColorTopInput = document.getElementById('borderColorTop') as HTMLInputElement;
     this.borderColorBottomInput = document.getElementById('borderColorBottom') as HTMLInputElement;
     this.borderColorLeftInput = document.getElementById('borderColorLeft') as HTMLInputElement;
@@ -67,7 +68,6 @@ class App {
     this.borderColorCornerInput = document.getElementById('borderColorCorner') as HTMLInputElement;
 
     // Buttons
-    this.generateBtn = document.getElementById('generateBtn') as HTMLButtonElement;
     this.saveTemplateBtn = document.getElementById('saveTemplateBtn') as HTMLButtonElement;
     this.spriteInput = document.getElementById('spriteInput') as HTMLInputElement;
     this.autoAdjustBtn = document.getElementById('autoAdjustBtn') as HTMLButtonElement;
@@ -80,9 +80,6 @@ class App {
   }
 
   private bindEvents(): void {
-    // Generate button
-    this.generateBtn.addEventListener('click', () => this.generateTemplate());
-
     // Save template button
     this.saveTemplateBtn.addEventListener('click', () => this.saveTemplate());
 
@@ -125,8 +122,10 @@ class App {
   private toggleDetailedColorSettings(): void {
     if (this.detailedColorModeCheckbox.checked) {
       this.detailedColorSettings.classList.remove('hidden');
+      this.borderColorGroup.classList.add('hidden');
     } else {
       this.detailedColorSettings.classList.add('hidden');
+      this.borderColorGroup.classList.remove('hidden');
     }
   }
 
