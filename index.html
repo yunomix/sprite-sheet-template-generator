@@ -31,10 +31,11 @@
         <h2>設定</h2>
 
         <div class="form-group">
-          <label for="tileFormat">オートタイル形式:</label>
+          <label for="tileFormat">テンプレートの種類:</label>
           <select id="tileFormat">
-            <option value="16">16タイル</option>
-            <option value="47">47タイル</option>
+            <option value="16">オートタイル 16タイル</option>
+            <option value="47">オートタイル 47タイル</option>
+            <option value="platformer">横スクロールアクションゲーム</option>
           </select>
         </div>
 
@@ -63,12 +64,12 @@
           <input type="color" id="borderColor" value="#ffff00">
         </div>
 
-        <div class="form-group">
+        <div class="form-group" id="borderWidthGroup">
           <label for="borderWidth">外周の太さ (px):</label>
           <input type="number" id="borderWidth" value="10" min="0">
         </div>
 
-        <div class="form-group checkbox-group">
+        <div class="form-group checkbox-group" id="detailedColorModeGroup">
           <label>
             <input type="checkbox" id="detailedColorMode">
             色の詳細設定

@@ -13,7 +13,7 @@ export interface DetailedBorderColors {
 }
 
 export interface TemplateConfig {
-  tileFormat: 16 | 47;
+  tileFormat: 16 | 47 | 'platformer';
   tileSize: number;
   padding: number;
   offset: number;
@@ -153,6 +153,12 @@ export class TemplateGenerator {
    */
   generate(): ImageProcessor {
     const { tileFormat, tileSize, padding, offset } = this.config;
+
+    // 横スクロールアクションゲーム用テンプレート
+    if (tileFormat === 'platformer') {
+      return this.generatePlatformerTemplate();
+    }
+
     const edges = tileFormat === 16 ? TILE_16_EDGES : TILE_47_EDGES;
 
     // グリッドサイズを計算
@@ -176,6 +182,200 @@ export class TemplateGenerator {
     }
 
     return processor;
+  }
+
+  /**
+   * 横スクロールアクションゲーム用テンプレートを生成
+   * レイアウト: 4列 x 4行
+   * - Row 0: 垂直な壁（左壁、右壁、天井、床）
+   * - Row 1: 45度の坂道（4方向）
+   * - Row 2: 30度の坂道（4方向）
+   * - Row 3: 15度の坂道（4方向）
+   */
+  private generatePlatformerTemplate(): ImageProcessor {
+    const { tileSize, padding, offset } = this.config;
+    const cols = 4;
+    const rows = 4;
+
+    const width = offset + cols * (tileSize + padding);
+    const height = offset + rows * (tileSize + padding);
+
+    const processor = new ImageProcessor(width, height);
+    const ctx = processor.getContext();
+
+    // Row 0: 垂直な壁（床、天井、左壁、右壁）
+    this.drawPlatformerTile(processor, ctx, 0, 0, 'floor');
+    this.drawPlatformerTile(processor, ctx, 1, 0, 'ceiling');
+    this.drawPlatformerTile(processor, ctx, 2, 0, 'wall_left');
+    this.drawPlatformerTile(processor, ctx, 3, 0, 'wall_right');
+
+    // Row 1: 45度の坂道
+    this.drawPlatformerTile(processor, ctx, 0, 1, 'slope_45_up');
+    this.drawPlatformerTile(processor, ctx, 1, 1, 'slope_45_down');
+    this.drawPlatformerTile(processor, ctx, 2, 1, 'slope_45_ceiling_up');
+    this.drawPlatformerTile(processor, ctx, 3, 1, 'slope_45_ceiling_down');
+
+    // Row 2: 30度の坂道
+    this.drawPlatformerTile(processor, ctx, 0, 2, 'slope_30_up');
+    this.drawPlatformerTile(processor, ctx, 1, 2, 'slope_30_down');
+    this.drawPlatformerTile(processor, ctx, 2, 2, 'slope_30_ceiling_up');
+    this.drawPlatformerTile(processor, ctx, 3, 2, 'slope_30_ceiling_down');
+
+    // Row 3: 15度の坂道
+    this.drawPlatformerTile(processor, ctx, 0, 3, 'slope_15_up');
+    this.drawPlatformerTile(processor, ctx, 1, 3, 'slope_15_down');
+    this.drawPlatformerTile(processor, ctx, 2, 3, 'slope_15_ceiling_up');
+    this.drawPlatformerTile(processor, ctx, 3, 3, 'slope_15_ceiling_down');
+
+    return processor;
+  }
+
+  /**
+   * 横スクロールアクションゲーム用の個別タイルを描画
+   */
+  private drawPlatformerTile(
+    _processor: ImageProcessor,
+    ctx: CanvasRenderingContext2D,
+    col: number,
+    row: number,
+    type: string
+  ): void {
+    const { tileSize, padding, offset, fillColor } = this.config;
+    const x = offset + col * (tileSize + padding);
+    const y = offset + row * (tileSize + padding);
+
+    ctx.fillStyle = this.colorToStyle(fillColor);
+
+    switch (type) {
+      case 'floor':
+        // 床: 下半分が塗りつぶし
+        ctx.fillRect(x, y + tileSize / 2, tileSize, tileSize / 2);
+        break;
+
+      case 'ceiling':
+        // 天井: 上半分が塗りつぶし
+        ctx.fillRect(x, y, tileSize, tileSize / 2);
+        break;
+
+      case 'wall_left':
+        // 左壁: 左半分が塗りつぶし
+        ctx.fillRect(x, y, tileSize / 2, tileSize);
+        break;
+
+      case 'wall_right':
+        // 右壁: 右半分が塗りつぶし
+        ctx.fillRect(x + tileSize / 2, y, tileSize / 2, tileSize);
+        break;
+
+      case 'slope_45_up':
+        // 45度上り坂（右上がり）
+        this.drawSlopePolygon(ctx, x, y, tileSize, 45, false, false);
+        break;
+
+      case 'slope_45_down':
+        // 45度下り坂（右下がり）= 左右反転
+        this.drawSlopePolygon(ctx, x, y, tileSize, 45, true, false);
+        break;
+
+      case 'slope_45_ceiling_up':
+        // 45度天井坂（右上がり）= 上下反転
+        this.drawSlopePolygon(ctx, x, y, tileSize, 45, false, true);
+        break;
+
+      case 'slope_45_ceiling_down':
+        // 45度天井坂（右下がり）= 左右+上下反転
+        this.drawSlopePolygon(ctx, x, y, tileSize, 45, true, true);
+        break;
+
+      case 'slope_30_up':
+        this.drawSlopePolygon(ctx, x, y, tileSize, 30, false, false);
+        break;
+
+      case 'slope_30_down':
+        this.drawSlopePolygon(ctx, x, y, tileSize, 30, true, false);
+        break;
+
+      case 'slope_30_ceiling_up':
+        this.drawSlopePolygon(ctx, x, y, tileSize, 30, false, true);
+        break;
+
+      case 'slope_30_ceiling_down':
+        this.drawSlopePolygon(ctx, x, y, tileSize, 30, true, true);
+        break;
+
+      case 'slope_15_up':
+        this.drawSlopePolygon(ctx, x, y, tileSize, 15, false, false);
+        break;
+
+      case 'slope_15_down':
+        this.drawSlopePolygon(ctx, x, y, tileSize, 15, true, false);
+        break;
+
+      case 'slope_15_ceiling_up':
+        this.drawSlopePolygon(ctx, x, y, tileSize, 15, false, true);
+        break;
+
+      case 'slope_15_ceiling_down':
+        this.drawSlopePolygon(ctx, x, y, tileSize, 15, true, true);
+        break;
+    }
+  }
+
+  /**
+   * 坂道のポリゴンを描画
+   * @param angle 角度（度）
+   * @param flipH 左右反転
+   * @param flipV 上下反転
+   */
+  private drawSlopePolygon(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    size: number,
+    angle: number,
+    flipH: boolean,
+    flipV: boolean
+  ): void {
+    // 角度から高さを計算
+    const height = size * Math.tan((angle * Math.PI) / 180);
+    const clampedHeight = Math.min(height, size);
+
+    ctx.beginPath();
+
+    if (!flipV) {
+      // 床タイプ（下が埋まる）
+      if (!flipH) {
+        // 右上がり: 左下から開始、左下→右下→右上（坂）→左下
+        ctx.moveTo(x, y + size);                          // 左下
+        ctx.lineTo(x + size, y + size);                   // 右下
+        ctx.lineTo(x + size, y + size - clampedHeight);   // 右上（坂の頂点）
+        ctx.lineTo(x, y + size);                          // 左下に戻る
+      } else {
+        // 右下がり（左右反転）: 左下→左上（坂）→右下
+        ctx.moveTo(x, y + size);                          // 左下
+        ctx.lineTo(x, y + size - clampedHeight);          // 左上（坂の頂点）
+        ctx.lineTo(x + size, y + size);                   // 右下
+        ctx.lineTo(x, y + size);                          // 左下に戻る
+      }
+    } else {
+      // 天井タイプ（上が埋まる）
+      if (!flipH) {
+        // 右上がり天井: 左上→右上→右下（坂）→左上
+        ctx.moveTo(x, y);                                 // 左上
+        ctx.lineTo(x + size, y);                          // 右上
+        ctx.lineTo(x + size, y + clampedHeight);          // 右下（坂の頂点）
+        ctx.lineTo(x, y);                                 // 左上に戻る
+      } else {
+        // 右下がり天井（左右反転）: 左上→左下（坂）→右上
+        ctx.moveTo(x, y);                                 // 左上
+        ctx.lineTo(x, y + clampedHeight);                 // 左下（坂の頂点）
+        ctx.lineTo(x + size, y);                          // 右上
+        ctx.lineTo(x, y);                                 // 左上に戻る
+      }
+    }
+
+    ctx.closePath();
+    ctx.fill();
   }
 
   /**
@@ -313,8 +513,17 @@ export class TemplateGenerator {
    */
   static getDimensions(config: TemplateConfig): { width: number; height: number; cols: number; rows: number } {
     const { tileFormat, tileSize, padding, offset } = config;
-    const cols = tileFormat === 16 ? 4 : 8;
-    const rows = tileFormat === 16 ? 4 : 6;
+    let cols: number;
+    let rows: number;
+
+    if (tileFormat === 'platformer') {
+      cols = 4;
+      rows = 4;
+    } else {
+      cols = tileFormat === 16 ? 4 : 8;
+      rows = tileFormat === 16 ? 4 : 6;
+    }
+
     const width = offset + cols * (tileSize + padding);
     const height = offset + rows * (tileSize + padding);
     return { width, height, cols, rows };

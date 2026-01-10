@@ -20,7 +20,9 @@ class App {
   // Detailed color settings
   private detailedColorModeCheckbox!: HTMLInputElement;
   private detailedColorSettings!: HTMLElement;
+  private detailedColorModeGroup!: HTMLElement;
   private borderColorGroup!: HTMLElement;
+  private borderWidthGroup!: HTMLElement;
   private borderColorTopInput!: HTMLInputElement;
   private borderColorBottomInput!: HTMLInputElement;
   private borderColorLeftInput!: HTMLInputElement;
@@ -60,7 +62,9 @@ class App {
     // Detailed color settings
     this.detailedColorModeCheckbox = document.getElementById('detailedColorMode') as HTMLInputElement;
     this.detailedColorSettings = document.getElementById('detailedColorSettings') as HTMLElement;
+    this.detailedColorModeGroup = document.getElementById('detailedColorModeGroup') as HTMLElement;
     this.borderColorGroup = document.getElementById('borderColorGroup') as HTMLElement;
+    this.borderWidthGroup = document.getElementById('borderWidthGroup') as HTMLElement;
     this.borderColorTopInput = document.getElementById('borderColorTop') as HTMLInputElement;
     this.borderColorBottomInput = document.getElementById('borderColorBottom') as HTMLInputElement;
     this.borderColorLeftInput = document.getElementById('borderColorLeft') as HTMLInputElement;
@@ -98,6 +102,14 @@ class App {
       this.generateTemplate();
     });
 
+    // Template format change
+    this.tileFormatSelect.addEventListener('change', () => {
+      this.updateUIForTemplateType();
+    });
+
+    // Initialize UI for current template type
+    this.updateUIForTemplateType();
+
     // Real-time preview on input change
     const inputs = [
       this.tileFormatSelect,
@@ -129,13 +141,44 @@ class App {
     }
   }
 
+  /**
+   * テンプレートの種類に応じてUIを更新
+   * 横スクロールアクションゲーム選択時は、外周関連の設定を非表示
+   */
+  private updateUIForTemplateType(): void {
+    const isPlatformer = this.tileFormatSelect.value === 'platformer';
+
+    if (isPlatformer) {
+      // 横スクロールアクションゲーム: フィルの色のみ表示
+      this.borderColorGroup.classList.add('hidden');
+      this.borderWidthGroup.classList.add('hidden');
+      this.detailedColorModeGroup.classList.add('hidden');
+      this.detailedColorSettings.classList.add('hidden');
+    } else {
+      // オートタイル: 外周関連の設定を表示
+      this.borderWidthGroup.classList.remove('hidden');
+      this.detailedColorModeGroup.classList.remove('hidden');
+      // 詳細色設定のトグル状態に応じて表示を更新
+      this.toggleDetailedColorSettings();
+    }
+  }
+
   private getConfig(): TemplateConfig {
     const tileSize = parseInt(this.tileSizeInput.value) || 64;
     const borderWidth = parseInt(this.borderWidthInput.value) || 10;
     const detailedColorMode = this.detailedColorModeCheckbox.checked;
+    const formatValue = this.tileFormatSelect.value;
+
+    // tileFormat の型を決定
+    let tileFormat: 16 | 47 | 'platformer';
+    if (formatValue === 'platformer') {
+      tileFormat = 'platformer';
+    } else {
+      tileFormat = parseInt(formatValue) as 16 | 47;
+    }
 
     const config: TemplateConfig = {
-      tileFormat: parseInt(this.tileFormatSelect.value) as 16 | 47,
+      tileFormat: tileFormat,
       tileSize: tileSize,
       padding: parseInt(this.tilePaddingInput.value) || 0,
       offset: parseInt(this.tileOffsetInput.value) || 0,
@@ -174,7 +217,9 @@ class App {
     }
 
     const format = this.tileFormatSelect.value;
-    const filename = `sprite_template_${format}tiles.png`;
+    const filename = format === 'platformer'
+      ? 'sprite_template_platformer.png'
+      : `sprite_template_${format}tiles.png`;
     this.templateProcessor.downloadAsFile(filename);
   }
 
@@ -227,7 +272,9 @@ class App {
     }
 
     const format = this.tileFormatSelect.value;
-    const filename = `sprite_adjusted_${format}tiles.png`;
+    const filename = format === 'platformer'
+      ? 'sprite_adjusted_platformer.png'
+      : `sprite_adjusted_${format}tiles.png`;
     this.adjustedProcessor.downloadAsFile(filename);
   }
 
