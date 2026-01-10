@@ -186,15 +186,15 @@ export class TemplateGenerator {
 
   /**
    * 横スクロールアクションゲーム用テンプレートを生成
-   * レイアウト: 4列 x 4行
-   * - Row 0: 垂直な壁（左壁、右壁、天井、床）
-   * - Row 1: 45度の坂道（4方向）
-   * - Row 2: 30度の坂道（4方向）
-   * - Row 3: 15度の坂道（4方向）
+   * レイアウト: 6列 x 4行
+   * - Row 0: 垂直な壁（床、天井、左壁、右壁）
+   * - Row 1: 45度の坂道（左坂、床、右坂）+ 天井版
+   * - Row 2: 30度の坂道（左坂、床、右坂）+ 天井版
+   * - Row 3: 15度の坂道（左坂、床、右坂）+ 天井版
    */
   private generatePlatformerTemplate(): ImageProcessor {
     const { tileSize, padding, offset } = this.config;
-    const cols = 4;
+    const cols = 6;
     const rows = 4;
 
     const width = offset + cols * (tileSize + padding);
@@ -209,23 +209,29 @@ export class TemplateGenerator {
     this.drawPlatformerTile(processor, ctx, 2, 0, 'wall_left');
     this.drawPlatformerTile(processor, ctx, 3, 0, 'wall_right');
 
-    // Row 1: 45度の坂道
+    // Row 1: 45度の坂道（左坂、床、右坂）+ 天井版
     this.drawPlatformerTile(processor, ctx, 0, 1, 'slope_45_up');
-    this.drawPlatformerTile(processor, ctx, 1, 1, 'slope_45_down');
-    this.drawPlatformerTile(processor, ctx, 2, 1, 'slope_45_ceiling_up');
+    this.drawPlatformerTile(processor, ctx, 1, 1, 'floor_45');
+    this.drawPlatformerTile(processor, ctx, 2, 1, 'slope_45_down');
     this.drawPlatformerTile(processor, ctx, 3, 1, 'slope_45_ceiling_down');
+    this.drawPlatformerTile(processor, ctx, 4, 1, 'ceiling_45');
+    this.drawPlatformerTile(processor, ctx, 5, 1, 'slope_45_ceiling_up');
 
-    // Row 2: 30度の坂道
+    // Row 2: 30度の坂道（左坂、床、右坂）+ 天井版
     this.drawPlatformerTile(processor, ctx, 0, 2, 'slope_30_up');
-    this.drawPlatformerTile(processor, ctx, 1, 2, 'slope_30_down');
-    this.drawPlatformerTile(processor, ctx, 2, 2, 'slope_30_ceiling_up');
+    this.drawPlatformerTile(processor, ctx, 1, 2, 'floor_30');
+    this.drawPlatformerTile(processor, ctx, 2, 2, 'slope_30_down');
     this.drawPlatformerTile(processor, ctx, 3, 2, 'slope_30_ceiling_down');
+    this.drawPlatformerTile(processor, ctx, 4, 2, 'ceiling_30');
+    this.drawPlatformerTile(processor, ctx, 5, 2, 'slope_30_ceiling_up');
 
-    // Row 3: 15度の坂道
+    // Row 3: 15度の坂道（左坂、床、右坂）+ 天井版
     this.drawPlatformerTile(processor, ctx, 0, 3, 'slope_15_up');
-    this.drawPlatformerTile(processor, ctx, 1, 3, 'slope_15_down');
-    this.drawPlatformerTile(processor, ctx, 2, 3, 'slope_15_ceiling_up');
+    this.drawPlatformerTile(processor, ctx, 1, 3, 'floor_15');
+    this.drawPlatformerTile(processor, ctx, 2, 3, 'slope_15_down');
     this.drawPlatformerTile(processor, ctx, 3, 3, 'slope_15_ceiling_down');
+    this.drawPlatformerTile(processor, ctx, 4, 3, 'ceiling_15');
+    this.drawPlatformerTile(processor, ctx, 5, 3, 'slope_15_ceiling_up');
 
     return processor;
   }
@@ -272,6 +278,11 @@ export class TemplateGenerator {
         this.drawSlopePolygon(ctx, x, y, tileSize, 45, false, false);
         break;
 
+      case 'floor_45':
+        // 45度坂と同じ高さの床
+        this.drawFloorAtHeight(ctx, x, y, tileSize, 45, false);
+        break;
+
       case 'slope_45_down':
         // 45度下り坂（右下がり）= 左右反転
         this.drawSlopePolygon(ctx, x, y, tileSize, 45, true, false);
@@ -280,6 +291,11 @@ export class TemplateGenerator {
       case 'slope_45_ceiling_up':
         // 45度天井坂（右上がり）= 上下反転
         this.drawSlopePolygon(ctx, x, y, tileSize, 45, false, true);
+        break;
+
+      case 'ceiling_45':
+        // 45度坂と同じ高さの天井
+        this.drawFloorAtHeight(ctx, x, y, tileSize, 45, true);
         break;
 
       case 'slope_45_ceiling_down':
@@ -291,12 +307,22 @@ export class TemplateGenerator {
         this.drawSlopePolygon(ctx, x, y, tileSize, 30, false, false);
         break;
 
+      case 'floor_30':
+        // 30度坂と同じ高さの床
+        this.drawFloorAtHeight(ctx, x, y, tileSize, 30, false);
+        break;
+
       case 'slope_30_down':
         this.drawSlopePolygon(ctx, x, y, tileSize, 30, true, false);
         break;
 
       case 'slope_30_ceiling_up':
         this.drawSlopePolygon(ctx, x, y, tileSize, 30, false, true);
+        break;
+
+      case 'ceiling_30':
+        // 30度坂と同じ高さの天井
+        this.drawFloorAtHeight(ctx, x, y, tileSize, 30, true);
         break;
 
       case 'slope_30_ceiling_down':
@@ -307,6 +333,11 @@ export class TemplateGenerator {
         this.drawSlopePolygon(ctx, x, y, tileSize, 15, false, false);
         break;
 
+      case 'floor_15':
+        // 15度坂と同じ高さの床
+        this.drawFloorAtHeight(ctx, x, y, tileSize, 15, false);
+        break;
+
       case 'slope_15_down':
         this.drawSlopePolygon(ctx, x, y, tileSize, 15, true, false);
         break;
@@ -315,9 +346,40 @@ export class TemplateGenerator {
         this.drawSlopePolygon(ctx, x, y, tileSize, 15, false, true);
         break;
 
+      case 'ceiling_15':
+        // 15度坂と同じ高さの天井
+        this.drawFloorAtHeight(ctx, x, y, tileSize, 15, true);
+        break;
+
       case 'slope_15_ceiling_down':
         this.drawSlopePolygon(ctx, x, y, tileSize, 15, true, true);
         break;
+    }
+  }
+
+  /**
+   * 坂道と同じ高さの床/天井を描画
+   * @param angle 角度（度）
+   * @param isCeiling 天井かどうか
+   */
+  private drawFloorAtHeight(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    size: number,
+    angle: number,
+    isCeiling: boolean
+  ): void {
+    // 角度から高さを計算
+    const height = size * Math.tan((angle * Math.PI) / 180);
+    const clampedHeight = Math.min(height, size);
+
+    if (!isCeiling) {
+      // 床: 下からclampedHeightの高さまで塗りつぶし
+      ctx.fillRect(x, y + size - clampedHeight, size, clampedHeight);
+    } else {
+      // 天井: 上からclampedHeightの高さまで塗りつぶし
+      ctx.fillRect(x, y, size, clampedHeight);
     }
   }
 
@@ -517,7 +579,7 @@ export class TemplateGenerator {
     let rows: number;
 
     if (tileFormat === 'platformer') {
-      cols = 4;
+      cols = 6;
       rows = 4;
     } else {
       cols = tileFormat === 16 ? 4 : 8;
