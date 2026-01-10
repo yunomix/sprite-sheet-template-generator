@@ -6,6 +6,6 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   base: '/sprite-sheet-template-generator/',
   build: {
-    outDir: 'dist',
+    outDir: 'docs',
   },
 });
