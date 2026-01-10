@@ -163,12 +163,8 @@ class App {
     const generator = new TemplateGenerator(config);
     this.templateProcessor = generator.generate();
 
-    // グリッド付きのプレビューを作成
-    const previewProcessor = this.templateProcessor.clone();
-    TemplateGenerator.drawGrid(previewProcessor, config);
-
-    // キャンバスに描画
-    this.renderToCanvas(previewProcessor, this.templateCanvas);
+    // プレビュー描画（グリッド付き、範囲外は灰色）
+    this.renderPreviewWithBackground(this.templateProcessor, this.templateCanvas, config);
   }
 
   private saveTemplate(): void {
@@ -194,11 +190,9 @@ class App {
       this.originalProcessor = await ImageProcessor.fromImage(image);
       URL.revokeObjectURL(url);
 
-      // 元画像を表示（グリッド付き）
+      // 元画像を表示（グリッド付き、範囲外は灰色）
       const config = this.getConfig();
-      const previewProcessor = this.originalProcessor.clone();
-      TemplateGenerator.drawGrid(previewProcessor, config);
-      this.renderToCanvas(previewProcessor, this.originalCanvas);
+      this.renderPreviewWithBackground(this.originalProcessor, this.originalCanvas, config);
 
       // 調整済み画像をクリア
       this.adjustedProcessor = null;
@@ -220,12 +214,8 @@ class App {
     const result = adjuster.adjustWithContentDetection(this.originalProcessor);
     this.adjustedProcessor = result.processor;
 
-    // グリッド付きのプレビューを作成
-    const previewProcessor = this.adjustedProcessor.clone();
-    TemplateGenerator.drawGrid(previewProcessor, config);
-
-    // 調整済み画像を表示
-    this.renderToCanvas(previewProcessor, this.adjustedCanvas);
+    // 調整済み画像を表示（グリッド付き、範囲外は灰色）
+    this.renderPreviewWithBackground(this.adjustedProcessor, this.adjustedCanvas, config);
 
     console.log('Adjustments:', result.adjustments);
   }
@@ -241,12 +231,75 @@ class App {
     this.adjustedProcessor.downloadAsFile(filename);
   }
 
-  private renderToCanvas(processor: ImageProcessor, canvas: HTMLCanvasElement): void {
-    canvas.width = processor.getWidth();
-    canvas.height = processor.getHeight();
+  /**
+   * プレビュー用の描画（テンプレートサイズ基準、範囲外は灰色）
+   */
+  private renderPreviewWithBackground(
+    processor: ImageProcessor,
+    canvas: HTMLCanvasElement,
+    config: TemplateConfig
+  ): void {
+    const dimensions = TemplateGenerator.getDimensions(config);
+    const imageWidth = processor.getWidth();
+    const imageHeight = processor.getHeight();
+
+    // キャンバスサイズはテンプレートサイズと画像サイズの大きい方
+    const canvasWidth = Math.max(dimensions.width, imageWidth);
+    const canvasHeight = Math.max(dimensions.height, imageHeight);
+
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+
     const ctx = canvas.getContext('2d');
-    if (ctx) {
-      ctx.drawImage(processor.getCanvas(), 0, 0);
+    if (!ctx) return;
+
+    // 背景を灰色で塗りつぶし
+    ctx.fillStyle = '#3a3a3a';
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+    // 画像を描画
+    ctx.drawImage(processor.getCanvas(), 0, 0);
+
+    // グリッドを画像の範囲内のみに描画
+    this.drawGridOnCanvas(ctx, config, imageWidth, imageHeight);
+  }
+
+  /**
+   * グリッド線をキャンバスに直接描画（画像範囲内のみ）
+   */
+  private drawGridOnCanvas(
+    ctx: CanvasRenderingContext2D,
+    config: TemplateConfig,
+    imageWidth: number,
+    imageHeight: number
+  ): void {
+    const { tileFormat, tileSize, padding, offset } = config;
+    const cols = tileFormat === 16 ? 4 : 8;
+    const rows = tileFormat === 16 ? 4 : 6;
+
+    ctx.strokeStyle = 'rgba(128, 128, 128, 0.7)';
+    ctx.lineWidth = 1;
+
+    // 縦線（各タイルの左端と最後のタイルの右端）
+    for (let i = 0; i <= cols; i++) {
+      const x = offset + i * (tileSize + padding);
+      if (x >= 0 && x <= imageWidth) {
+        ctx.beginPath();
+        ctx.moveTo(x + 0.5, 0);
+        ctx.lineTo(x + 0.5, imageHeight);
+        ctx.stroke();
+      }
+    }
+
+    // 横線（各タイルの上端と最後のタイルの下端）
+    for (let i = 0; i <= rows; i++) {
+      const y = offset + i * (tileSize + padding);
+      if (y >= 0 && y <= imageHeight) {
+        ctx.beginPath();
+        ctx.moveTo(0, y + 0.5);
+        ctx.lineTo(imageWidth, y + 0.5);
+        ctx.stroke();
+      }
     }
   }
 

@@ -280,6 +280,7 @@ export class TemplateGenerator {
 
   /**
    * グリッド線を描画（プレビュー用）
+   * 画像の左上を基準として、オフセット、タイルサイズ、パディングに基づいて描画
    */
   static drawGrid(processor: ImageProcessor, config: TemplateConfig): void {
     const { tileFormat, tileSize, padding, offset } = config;
@@ -287,16 +288,23 @@ export class TemplateGenerator {
     const rows = tileFormat === 16 ? 4 : 6;
     const gridColor: Color = { r: 128, g: 128, b: 128, a: 180 };
 
-    // 縦線
+    const imageWidth = processor.getWidth();
+    const imageHeight = processor.getHeight();
+
+    // 縦線（各タイルの左端と最後のタイルの右端）
     for (let i = 0; i <= cols; i++) {
-      const x = offset + i * (tileSize + padding) - (padding > 0 ? padding / 2 : 0);
-      processor.drawLine(x, 0, x, processor.getHeight(), gridColor, 1);
+      const x = offset + i * (tileSize + padding);
+      if (x >= 0 && x <= imageWidth) {
+        processor.drawLine(x, 0, x, imageHeight, gridColor, 1);
+      }
     }
 
-    // 横線
+    // 横線（各タイルの上端と最後のタイルの下端）
     for (let i = 0; i <= rows; i++) {
-      const y = offset + i * (tileSize + padding) - (padding > 0 ? padding / 2 : 0);
-      processor.drawLine(0, y, processor.getWidth(), y, gridColor, 1);
+      const y = offset + i * (tileSize + padding);
+      if (y >= 0 && y <= imageHeight) {
+        processor.drawLine(0, y, imageWidth, y, gridColor, 1);
+      }
     }
   }
 
