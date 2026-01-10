@@ -19,8 +19,8 @@
   <meta name="twitter:description" content="2Dゲーム用スプライトシートのテンプレート画像を生成するツール。Unityオートタイル対応。">
   <meta name="twitter:image" content="https://yunomix.github.io/sprite-sheet-template-generator/ogp.png">
 
-  <script type="module" crossorigin src="/sprite-sheet-template-generator/assets/index-L1fJuEvx.js"></script>
-  <link rel="stylesheet" crossorigin href="/sprite-sheet-template-generator/assets/index-B1WmkEeK.css">
+  <script type="module" crossorigin src="/sprite-sheet-template-generator/assets/index-CwGVnC8c.js"></script>
+  <link rel="stylesheet" crossorigin href="/sprite-sheet-template-generator/assets/index-CU19yLaZ.css">
 </head>
 <body>
   <div class="container">
@@ -67,6 +67,36 @@
         <div class="form-group">
           <label for="borderWidth">外周の太さ (px):</label>
           <input type="number" id="borderWidth" value="10" min="0">
+        </div>
+
+        <div class="form-group checkbox-group">
+          <label>
+            <input type="checkbox" id="detailedColorMode">
+            色の詳細設定
+          </label>
+        </div>
+
+        <div id="detailedColorSettings" class="detailed-colors hidden">
+          <div class="form-group">
+            <label for="borderColorTop">上辺の色:</label>
+            <input type="color" id="borderColorTop" value="#ff0000">
+          </div>
+          <div class="form-group">
+            <label for="borderColorBottom">下辺の色:</label>
+            <input type="color" id="borderColorBottom" value="#00ff00">
+          </div>
+          <div class="form-group">
+            <label for="borderColorLeft">左辺の色:</label>
+            <input type="color" id="borderColorLeft" value="#0000ff">
+          </div>
+          <div class="form-group">
+            <label for="borderColorRight">右辺の色:</label>
+            <input type="color" id="borderColorRight" value="#ff00ff">
+          </div>
+          <div class="form-group">
+            <label for="borderColorCorner">角の色:</label>
+            <input type="color" id="borderColorCorner" value="#ffff00">
+          </div>
         </div>
 
         <div class="button-group">

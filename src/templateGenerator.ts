@@ -4,6 +4,14 @@
 
 import { ImageProcessor, Color } from './imageProcessor';
 
+export interface DetailedBorderColors {
+  top: Color;
+  bottom: Color;
+  left: Color;
+  right: Color;
+  corner: Color;
+}
+
 export interface TemplateConfig {
   tileFormat: 16 | 47;
   tileSize: number;
@@ -12,6 +20,8 @@ export interface TemplateConfig {
   fillColor: Color;
   borderColor: Color;
   borderWidth: number;
+  detailedColorMode: boolean;
+  detailedColors?: DetailedBorderColors;
 }
 
 /**
@@ -169,39 +179,82 @@ export class TemplateGenerator {
   }
 
   /**
+   * 色をCSS文字列に変換
+   */
+  private colorToStyle(color: Color): string {
+    return `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a / 255})`;
+  }
+
+  /**
+   * 辺の色を取得
+   */
+  private getBorderColor(edge: 'top' | 'bottom' | 'left' | 'right' | 'corner'): Color {
+    const { detailedColorMode, detailedColors, borderColor } = this.config;
+    if (detailedColorMode && detailedColors) {
+      return detailedColors[edge];
+    }
+    return borderColor;
+  }
+
+  /**
    * 個別のタイルを描画
    */
   private drawTile(processor: ImageProcessor, x: number, y: number, edges: TileEdge): void {
-    const { tileSize, fillColor, borderColor, borderWidth } = this.config;
+    const { tileSize, fillColor, borderWidth } = this.config;
     const ctx = processor.getContext();
 
     // 塗りつぶし
     processor.fillRect({ x, y, width: tileSize, height: tileSize }, fillColor);
 
-    // 外周を描画（接続していない辺に描画）
-    ctx.fillStyle = `rgba(${borderColor.r}, ${borderColor.g}, ${borderColor.b}, ${borderColor.a / 255})`;
-
     // 上辺
     if (!(edges & TileEdge.TOP)) {
+      ctx.fillStyle = this.colorToStyle(this.getBorderColor('top'));
       ctx.fillRect(x, y, tileSize, borderWidth);
     }
 
     // 右辺
     if (!(edges & TileEdge.RIGHT)) {
+      ctx.fillStyle = this.colorToStyle(this.getBorderColor('right'));
       ctx.fillRect(x + tileSize - borderWidth, y, borderWidth, tileSize);
     }
 
     // 下辺
     if (!(edges & TileEdge.BOTTOM)) {
+      ctx.fillStyle = this.colorToStyle(this.getBorderColor('bottom'));
       ctx.fillRect(x, y + tileSize - borderWidth, tileSize, borderWidth);
     }
 
     // 左辺
     if (!(edges & TileEdge.LEFT)) {
+      ctx.fillStyle = this.colorToStyle(this.getBorderColor('left'));
       ctx.fillRect(x, y, borderWidth, tileSize);
     }
 
-    // コーナー（47タイルの場合のみ、内側コーナー）
+    // 外側コーナーの重なり部分を角の色で上書き
+    const cornerColor = this.getBorderColor('corner');
+    ctx.fillStyle = this.colorToStyle(cornerColor);
+
+    // 左上外側コーナー
+    if (!(edges & TileEdge.TOP) && !(edges & TileEdge.LEFT)) {
+      ctx.fillRect(x, y, borderWidth, borderWidth);
+    }
+
+    // 右上外側コーナー
+    if (!(edges & TileEdge.TOP) && !(edges & TileEdge.RIGHT)) {
+      ctx.fillRect(x + tileSize - borderWidth, y, borderWidth, borderWidth);
+    }
+
+    // 右下外側コーナー
+    if (!(edges & TileEdge.BOTTOM) && !(edges & TileEdge.RIGHT)) {
+      ctx.fillRect(x + tileSize - borderWidth, y + tileSize - borderWidth, borderWidth, borderWidth);
+    }
+
+    // 左下外側コーナー
+    if (!(edges & TileEdge.BOTTOM) && !(edges & TileEdge.LEFT)) {
+      ctx.fillRect(x, y + tileSize - borderWidth, borderWidth, borderWidth);
+    }
+
+    // 内側コーナー（47タイルの場合のみ）
     if (this.config.tileFormat === 47) {
       // 左上内側コーナー（接続されていない場合）
       if ((edges & TileEdge.TOP) && (edges & TileEdge.LEFT) && !(edges & TileEdge.TOP_LEFT)) {

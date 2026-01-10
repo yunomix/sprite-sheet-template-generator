@@ -17,6 +17,15 @@ class App {
   private borderColorInput!: HTMLInputElement;
   private borderWidthInput!: HTMLInputElement;
 
+  // Detailed color settings
+  private detailedColorModeCheckbox!: HTMLInputElement;
+  private detailedColorSettings!: HTMLElement;
+  private borderColorTopInput!: HTMLInputElement;
+  private borderColorBottomInput!: HTMLInputElement;
+  private borderColorLeftInput!: HTMLInputElement;
+  private borderColorRightInput!: HTMLInputElement;
+  private borderColorCornerInput!: HTMLInputElement;
+
   private generateBtn!: HTMLButtonElement;
   private saveTemplateBtn!: HTMLButtonElement;
   private spriteInput!: HTMLInputElement;
@@ -48,6 +57,15 @@ class App {
     this.borderColorInput = document.getElementById('borderColor') as HTMLInputElement;
     this.borderWidthInput = document.getElementById('borderWidth') as HTMLInputElement;
 
+    // Detailed color settings
+    this.detailedColorModeCheckbox = document.getElementById('detailedColorMode') as HTMLInputElement;
+    this.detailedColorSettings = document.getElementById('detailedColorSettings') as HTMLElement;
+    this.borderColorTopInput = document.getElementById('borderColorTop') as HTMLInputElement;
+    this.borderColorBottomInput = document.getElementById('borderColorBottom') as HTMLInputElement;
+    this.borderColorLeftInput = document.getElementById('borderColorLeft') as HTMLInputElement;
+    this.borderColorRightInput = document.getElementById('borderColorRight') as HTMLInputElement;
+    this.borderColorCornerInput = document.getElementById('borderColorCorner') as HTMLInputElement;
+
     // Buttons
     this.generateBtn = document.getElementById('generateBtn') as HTMLButtonElement;
     this.saveTemplateBtn = document.getElementById('saveTemplateBtn') as HTMLButtonElement;
@@ -77,6 +95,12 @@ class App {
     // Save adjusted button
     this.saveAdjustedBtn.addEventListener('click', () => this.saveAdjusted());
 
+    // Detailed color mode toggle
+    this.detailedColorModeCheckbox.addEventListener('change', () => {
+      this.toggleDetailedColorSettings();
+      this.generateTemplate();
+    });
+
     // Real-time preview on input change
     const inputs = [
       this.tileFormatSelect,
@@ -86,6 +110,11 @@ class App {
       this.fillColorInput,
       this.borderColorInput,
       this.borderWidthInput,
+      this.borderColorTopInput,
+      this.borderColorBottomInput,
+      this.borderColorLeftInput,
+      this.borderColorRightInput,
+      this.borderColorCornerInput,
     ];
 
     inputs.forEach((input) => {
@@ -93,11 +122,20 @@ class App {
     });
   }
 
+  private toggleDetailedColorSettings(): void {
+    if (this.detailedColorModeCheckbox.checked) {
+      this.detailedColorSettings.classList.remove('hidden');
+    } else {
+      this.detailedColorSettings.classList.add('hidden');
+    }
+  }
+
   private getConfig(): TemplateConfig {
     const tileSize = parseInt(this.tileSizeInput.value) || 64;
     const borderWidth = parseInt(this.borderWidthInput.value) || 10;
+    const detailedColorMode = this.detailedColorModeCheckbox.checked;
 
-    return {
+    const config: TemplateConfig = {
       tileFormat: parseInt(this.tileFormatSelect.value) as 16 | 47,
       tileSize: tileSize,
       padding: parseInt(this.tilePaddingInput.value) || 0,
@@ -105,7 +143,20 @@ class App {
       fillColor: ImageProcessor.hexToColor(this.fillColorInput.value),
       borderColor: ImageProcessor.hexToColor(this.borderColorInput.value),
       borderWidth: Math.min(borderWidth, Math.floor(tileSize / 2)),
+      detailedColorMode: detailedColorMode,
     };
+
+    if (detailedColorMode) {
+      config.detailedColors = {
+        top: ImageProcessor.hexToColor(this.borderColorTopInput.value),
+        bottom: ImageProcessor.hexToColor(this.borderColorBottomInput.value),
+        left: ImageProcessor.hexToColor(this.borderColorLeftInput.value),
+        right: ImageProcessor.hexToColor(this.borderColorRightInput.value),
+        corner: ImageProcessor.hexToColor(this.borderColorCornerInput.value),
+      };
+    }
+
+    return config;
   }
 
   private generateTemplate(): void {

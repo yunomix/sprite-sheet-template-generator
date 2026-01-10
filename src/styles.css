@@ -231,3 +231,53 @@ button:active {
     flex-direction: column;
   }
 }
+
+/* Checkbox group */
+.checkbox-group {
+  margin-top: 10px;
+}
+
+.checkbox-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #4fc3f7;
+  cursor: pointer;
+}
+
+/* Detailed color settings */
+.detailed-colors {
+  background-color: #0f3460;
+  border: 1px solid #37474f;
+  border-radius: 5px;
+  padding: 15px;
+  margin-top: 10px;
+}
+
+.detailed-colors .form-group {
+  margin-bottom: 10px;
+}
+
+.detailed-colors .form-group:last-child {
+  margin-bottom: 0;
+}
+
+.detailed-colors .form-group label {
+  font-size: 0.85rem;
+}
+
+.detailed-colors .form-group input[type="color"] {
+  height: 32px;
+}
+
+/* Hidden utility class */
+.hidden {
+  display: none !important;
+}
