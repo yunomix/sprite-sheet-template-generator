@@ -321,8 +321,16 @@ class App {
     imageHeight: number
   ): void {
     const { tileFormat, tileSize, padding, offset } = config;
-    const cols = tileFormat === 16 ? 4 : 8;
-    const rows = tileFormat === 16 ? 4 : 6;
+    let cols: number;
+    let rows: number;
+
+    if (tileFormat === 'platformer') {
+      cols = 7;
+      rows = 9;
+    } else {
+      cols = tileFormat === 16 ? 4 : 8;
+      rows = tileFormat === 16 ? 4 : 6;
+    }
 
     ctx.strokeStyle = 'rgba(128, 128, 128, 0.7)';
     ctx.lineWidth = 1;
