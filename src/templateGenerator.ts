@@ -186,19 +186,21 @@ export class TemplateGenerator {
 
   /**
    * 横スクロールアクションゲーム用テンプレートを生成
-   * レイアウト: 7列 x 7行
-   * - Row 0: 垂直な壁（床、天井、左壁、右壁）
-   * - Row 1: 45度の坂道（床版）
+   * レイアウト: 7列 x 9行
+   * - Row 0: 45度の坂道（床版）
+   * - Row 1: 単純な四角（3個）
    * - Row 2: 45度の坂道（天井版）
    * - Row 3: 1/2勾配の坂道（床版）- 2タイルで1タイル分上る
-   * - Row 4: 1/2勾配の坂道（天井版）
-   * - Row 5: 1/3勾配の坂道（床版）- 3タイルで1タイル分上る
-   * - Row 6: 1/3勾配の坂道（天井版）
+   * - Row 4: 単純な四角（5個）
+   * - Row 5: 1/2勾配の坂道（天井版）
+   * - Row 6: 1/3勾配の坂道（床版）- 3タイルで1タイル分上る
+   * - Row 7: 単純な四角（7個）
+   * - Row 8: 1/3勾配の坂道（天井版）
    */
   private generatePlatformerTemplate(): ImageProcessor {
     const { tileSize, padding, offset, fillColor } = this.config;
     const cols = 7;
-    const rows = 7;
+    const rows = 9;
 
     const width = offset + cols * (tileSize + padding);
     const height = offset + rows * (tileSize + padding);
@@ -208,16 +210,15 @@ export class TemplateGenerator {
 
     ctx.fillStyle = this.colorToStyle(fillColor);
 
-    // Row 0: 垂直な壁（床、天井、左壁、右壁）
-    this.drawPlatformerTile(processor, ctx, 0, 0, 'floor');
-    this.drawPlatformerTile(processor, ctx, 1, 0, 'ceiling');
-    this.drawPlatformerTile(processor, ctx, 2, 0, 'wall_left');
-    this.drawPlatformerTile(processor, ctx, 3, 0, 'wall_right');
+    // Row 0: 45度の坂道（床版）- 左坂、床、右坂
+    this.drawPlatformerTile(processor, ctx, 0, 0, 'slope_45_up');
+    this.drawPlatformerTile(processor, ctx, 1, 0, 'floor_45');
+    this.drawPlatformerTile(processor, ctx, 2, 0, 'slope_45_down');
 
-    // Row 1: 45度の坂道（床版）- 左坂、床、右坂
-    this.drawPlatformerTile(processor, ctx, 0, 1, 'slope_45_up');
-    this.drawPlatformerTile(processor, ctx, 1, 1, 'floor_45');
-    this.drawPlatformerTile(processor, ctx, 2, 1, 'slope_45_down');
+    // Row 1: 単純な四角（3個）
+    for (let i = 0; i < 3; i++) {
+      this.drawFilledSquare(ctx, i, 1, tileSize, padding, offset);
+    }
 
     // Row 2: 45度の坂道（天井版）
     this.drawPlatformerTile(processor, ctx, 0, 2, 'slope_45_ceiling_up');
@@ -232,33 +233,59 @@ export class TemplateGenerator {
     this.drawMultiTileSlope(ctx, 3, 3, tileSize, padding, offset, 2, 1, true, false);  // 1→1/2
     this.drawMultiTileSlope(ctx, 4, 3, tileSize, padding, offset, 2, 0, true, false);  // 1/2→0
 
-    // Row 4: 1/2勾配の坂道（天井版）
-    this.drawMultiTileSlope(ctx, 0, 4, tileSize, padding, offset, 2, 0, false, true);
-    this.drawMultiTileSlope(ctx, 1, 4, tileSize, padding, offset, 2, 1, false, true);
-    this.drawFloorAtFraction(ctx, 2, 4, tileSize, padding, offset, 1, true);
-    this.drawMultiTileSlope(ctx, 3, 4, tileSize, padding, offset, 2, 1, true, true);
-    this.drawMultiTileSlope(ctx, 4, 4, tileSize, padding, offset, 2, 0, true, true);
+    // Row 4: 単純な四角（5個）
+    for (let i = 0; i < 5; i++) {
+      this.drawFilledSquare(ctx, i, 4, tileSize, padding, offset);
+    }
 
-    // Row 5: 1/3勾配の坂道（床版）- 3タイルで上る
+    // Row 5: 1/2勾配の坂道（天井版）
+    this.drawMultiTileSlope(ctx, 0, 5, tileSize, padding, offset, 2, 0, false, true);
+    this.drawMultiTileSlope(ctx, 1, 5, tileSize, padding, offset, 2, 1, false, true);
+    this.drawFloorAtFraction(ctx, 2, 5, tileSize, padding, offset, 1, true);
+    this.drawMultiTileSlope(ctx, 3, 5, tileSize, padding, offset, 2, 1, true, true);
+    this.drawMultiTileSlope(ctx, 4, 5, tileSize, padding, offset, 2, 0, true, true);
+
+    // Row 6: 1/3勾配の坂道（床版）- 3タイルで上る
     // 左坂1, 左坂2, 左坂3, 床, 右坂3, 右坂2, 右坂1
-    this.drawMultiTileSlope(ctx, 0, 5, tileSize, padding, offset, 3, 0, false, false); // 0→1/3
-    this.drawMultiTileSlope(ctx, 1, 5, tileSize, padding, offset, 3, 1, false, false); // 1/3→2/3
-    this.drawMultiTileSlope(ctx, 2, 5, tileSize, padding, offset, 3, 2, false, false); // 2/3→1
-    this.drawFloorAtFraction(ctx, 3, 5, tileSize, padding, offset, 1, false);          // 床（高さ1）
-    this.drawMultiTileSlope(ctx, 4, 5, tileSize, padding, offset, 3, 2, true, false);  // 1→2/3
-    this.drawMultiTileSlope(ctx, 5, 5, tileSize, padding, offset, 3, 1, true, false);  // 2/3→1/3
-    this.drawMultiTileSlope(ctx, 6, 5, tileSize, padding, offset, 3, 0, true, false);  // 1/3→0
+    this.drawMultiTileSlope(ctx, 0, 6, tileSize, padding, offset, 3, 0, false, false); // 0→1/3
+    this.drawMultiTileSlope(ctx, 1, 6, tileSize, padding, offset, 3, 1, false, false); // 1/3→2/3
+    this.drawMultiTileSlope(ctx, 2, 6, tileSize, padding, offset, 3, 2, false, false); // 2/3→1
+    this.drawFloorAtFraction(ctx, 3, 6, tileSize, padding, offset, 1, false);          // 床（高さ1）
+    this.drawMultiTileSlope(ctx, 4, 6, tileSize, padding, offset, 3, 2, true, false);  // 1→2/3
+    this.drawMultiTileSlope(ctx, 5, 6, tileSize, padding, offset, 3, 1, true, false);  // 2/3→1/3
+    this.drawMultiTileSlope(ctx, 6, 6, tileSize, padding, offset, 3, 0, true, false);  // 1/3→0
 
-    // Row 6: 1/3勾配の坂道（天井版）
-    this.drawMultiTileSlope(ctx, 0, 6, tileSize, padding, offset, 3, 0, false, true);
-    this.drawMultiTileSlope(ctx, 1, 6, tileSize, padding, offset, 3, 1, false, true);
-    this.drawMultiTileSlope(ctx, 2, 6, tileSize, padding, offset, 3, 2, false, true);
-    this.drawFloorAtFraction(ctx, 3, 6, tileSize, padding, offset, 1, true);
-    this.drawMultiTileSlope(ctx, 4, 6, tileSize, padding, offset, 3, 2, true, true);
-    this.drawMultiTileSlope(ctx, 5, 6, tileSize, padding, offset, 3, 1, true, true);
-    this.drawMultiTileSlope(ctx, 6, 6, tileSize, padding, offset, 3, 0, true, true);
+    // Row 7: 単純な四角（7個）
+    for (let i = 0; i < 7; i++) {
+      this.drawFilledSquare(ctx, i, 7, tileSize, padding, offset);
+    }
+
+    // Row 8: 1/3勾配の坂道（天井版）
+    this.drawMultiTileSlope(ctx, 0, 8, tileSize, padding, offset, 3, 0, false, true);
+    this.drawMultiTileSlope(ctx, 1, 8, tileSize, padding, offset, 3, 1, false, true);
+    this.drawMultiTileSlope(ctx, 2, 8, tileSize, padding, offset, 3, 2, false, true);
+    this.drawFloorAtFraction(ctx, 3, 8, tileSize, padding, offset, 1, true);
+    this.drawMultiTileSlope(ctx, 4, 8, tileSize, padding, offset, 3, 2, true, true);
+    this.drawMultiTileSlope(ctx, 5, 8, tileSize, padding, offset, 3, 1, true, true);
+    this.drawMultiTileSlope(ctx, 6, 8, tileSize, padding, offset, 3, 0, true, true);
 
     return processor;
+  }
+
+  /**
+   * 単純な塗りつぶし四角を描画
+   */
+  private drawFilledSquare(
+    ctx: CanvasRenderingContext2D,
+    col: number,
+    row: number,
+    tileSize: number,
+    padding: number,
+    offset: number
+  ): void {
+    const x = offset + col * (tileSize + padding);
+    const y = offset + row * (tileSize + padding);
+    ctx.fillRect(x, y, tileSize, tileSize);
   }
 
   /**
@@ -696,7 +723,7 @@ export class TemplateGenerator {
 
     if (tileFormat === 'platformer') {
       cols = 7;
-      rows = 7;
+      rows = 9;
     } else {
       cols = tileFormat === 16 ? 4 : 8;
       rows = tileFormat === 16 ? 4 : 6;
