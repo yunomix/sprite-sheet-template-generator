@@ -31,16 +31,16 @@ export class AutoAdjuster {
    * スプライトシート画像を自動調整
    */
   adjust(source: ImageProcessor): AdjustmentResult {
-    const { tileFormat, tileSize, padding, offset } = this.config;
+    const { tileSize, padding, offset } = this.config;
     const dimensions = TemplateGenerator.getDimensions(this.config);
 
     // 出力画像を作成
     const result = new ImageProcessor(dimensions.width, dimensions.height);
     const adjustments: TileAdjustment[] = [];
 
-    // タイル数を取得
-    const totalTiles = tileFormat === 16 ? 16 : 47;
+    // タイル数を取得（グリッド全体を処理）
     const cols = dimensions.cols;
+    const totalTiles = dimensions.cols * dimensions.rows;
 
     for (let i = 0; i < totalTiles; i++) {
       const col = i % cols;
@@ -155,6 +155,7 @@ export class AutoAdjuster {
     _totalTiles: number
   ): Rect {
     const { tileSize, padding, offset } = this.config;
+    const dimensions = TemplateGenerator.getDimensions(this.config);
 
     // 基本的な位置計算
     const col = tileIndex % cols;
@@ -164,9 +165,9 @@ export class AutoAdjuster {
     const sourceWidth = source.getWidth();
     const sourceHeight = source.getHeight();
 
-    const expectedWidth = offset + cols * (tileSize + padding);
-    const expectedRows = Math.ceil(_totalTiles / cols);
-    const expectedHeight = offset + expectedRows * (tileSize + padding);
+    // テンプレートの期待サイズ
+    const expectedWidth = dimensions.width;
+    const expectedHeight = dimensions.height;
 
     // ソース画像とテンプレートのスケール比
     const scaleX = sourceWidth / expectedWidth;
@@ -179,11 +180,16 @@ export class AutoAdjuster {
     const height = Math.round(tileSize * scaleY);
 
     // 境界チェック
+    const clampedX = Math.max(0, Math.min(x, sourceWidth - 1));
+    const clampedY = Math.max(0, Math.min(y, sourceHeight - 1));
+    const clampedWidth = Math.max(1, Math.min(width, sourceWidth - clampedX));
+    const clampedHeight = Math.max(1, Math.min(height, sourceHeight - clampedY));
+
     return {
-      x: Math.max(0, Math.min(x, sourceWidth - width)),
-      y: Math.max(0, Math.min(y, sourceHeight - height)),
-      width: Math.min(width, sourceWidth - x),
-      height: Math.min(height, sourceHeight - y),
+      x: clampedX,
+      y: clampedY,
+      width: clampedWidth,
+      height: clampedHeight,
     };
   }
 
@@ -192,14 +198,15 @@ export class AutoAdjuster {
    * 各タイルのコンテンツを検出し、位置とサイズを自動調整
    */
   adjustWithContentDetection(source: ImageProcessor): AdjustmentResult {
-    const { tileFormat, tileSize, padding, offset } = this.config;
+    const { tileSize, padding, offset } = this.config;
     const dimensions = TemplateGenerator.getDimensions(this.config);
 
     const result = new ImageProcessor(dimensions.width, dimensions.height);
     const adjustments: TileAdjustment[] = [];
 
-    const totalTiles = tileFormat === 16 ? 16 : 47;
+    // タイル数を取得（グリッド全体を処理）
     const cols = dimensions.cols;
+    const totalTiles = dimensions.cols * dimensions.rows;
 
     // 全タイルの平均サイズを計算（正規化用）
     const detectedSizes: { width: number; height: number }[] = [];
