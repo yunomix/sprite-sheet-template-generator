@@ -213,25 +213,25 @@ export class TemplateGenerator {
     this.drawPlatformerTile(processor, ctx, 0, 1, 'slope_45_up');
     this.drawPlatformerTile(processor, ctx, 1, 1, 'floor_45');
     this.drawPlatformerTile(processor, ctx, 2, 1, 'slope_45_down');
-    this.drawPlatformerTile(processor, ctx, 3, 1, 'slope_45_ceiling_down');
+    this.drawPlatformerTile(processor, ctx, 3, 1, 'slope_45_ceiling_up');
     this.drawPlatformerTile(processor, ctx, 4, 1, 'ceiling_45');
-    this.drawPlatformerTile(processor, ctx, 5, 1, 'slope_45_ceiling_up');
+    this.drawPlatformerTile(processor, ctx, 5, 1, 'slope_45_ceiling_down');
 
     // Row 2: 30度の坂道（左坂、床、右坂）+ 天井版
     this.drawPlatformerTile(processor, ctx, 0, 2, 'slope_30_up');
     this.drawPlatformerTile(processor, ctx, 1, 2, 'floor_30');
     this.drawPlatformerTile(processor, ctx, 2, 2, 'slope_30_down');
-    this.drawPlatformerTile(processor, ctx, 3, 2, 'slope_30_ceiling_down');
+    this.drawPlatformerTile(processor, ctx, 3, 2, 'slope_30_ceiling_up');
     this.drawPlatformerTile(processor, ctx, 4, 2, 'ceiling_30');
-    this.drawPlatformerTile(processor, ctx, 5, 2, 'slope_30_ceiling_up');
+    this.drawPlatformerTile(processor, ctx, 5, 2, 'slope_30_ceiling_down');
 
     // Row 3: 15度の坂道（左坂、床、右坂）+ 天井版
     this.drawPlatformerTile(processor, ctx, 0, 3, 'slope_15_up');
     this.drawPlatformerTile(processor, ctx, 1, 3, 'floor_15');
     this.drawPlatformerTile(processor, ctx, 2, 3, 'slope_15_down');
-    this.drawPlatformerTile(processor, ctx, 3, 3, 'slope_15_ceiling_down');
+    this.drawPlatformerTile(processor, ctx, 3, 3, 'slope_15_ceiling_up');
     this.drawPlatformerTile(processor, ctx, 4, 3, 'ceiling_15');
-    this.drawPlatformerTile(processor, ctx, 5, 3, 'slope_15_ceiling_up');
+    this.drawPlatformerTile(processor, ctx, 5, 3, 'slope_15_ceiling_down');
 
     return processor;
   }
